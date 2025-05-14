@@ -52,9 +52,24 @@ create_symlink "$DOTFILES_DIR/.zprofile" "$HOME/.zprofile"
 create_symlink "$DOTFILES_DIR/.zlogin" "$HOME/.zlogin"
 create_symlink "$DOTFILES_DIR/.zlogout" "$HOME/.zlogout"
 
-# Link Tmux related files
-create_symlink "$DOTFILES_DIR/.config/tmux/.tmux.conf" "$HOME/.config/tmux/.tmux.conf"
-create_symlink "$DOTFILES_DIR/.config/tmux/.tmux" "$HOME/.config/tmux/.tmux"
+# Link Tmux.conf
+create_symlink "$DOTFILES_DIR/.config/tmux/.tmux.conf" "$HOME/.tmux.conf"
+
+# Handle .tmux directory properly to avoid symlink loop
+# First check if .tmux in dotfiles is a symlink
+if [ -L "$DOTFILES_DIR/.config/tmux/.tmux" ]; then
+    echo -e "${YELLOW}Removing existing symlink: $DOTFILES_DIR/.config/tmux/.tmux${NC}"
+    rm "$DOTFILES_DIR/.config/tmux/.tmux"
+fi
+
+# Create directory if it doesn't exist
+if [ ! -d "$DOTFILES_DIR/.config/tmux/.tmux" ]; then
+    echo -e "${YELLOW}Creating .tmux directory: $DOTFILES_DIR/.config/tmux/.tmux${NC}"
+    mkdir -p "$DOTFILES_DIR/.config/tmux/.tmux/plugins"
+fi
+
+# Create symlink for .tmux
+create_symlink "$DOTFILES_DIR/.config/tmux/.tmux" "$HOME/.tmux"
 
 # Link Neovim configuration
 create_symlink "$DOTFILES_DIR/.config/nvim" "$HOME/.config/nvim"
@@ -66,9 +81,9 @@ create_symlink "$DOTFILES_DIR/term/wezterm.lua" "$HOME/.config/wezterm/wezterm.l
 create_symlink "$DOTFILES_DIR/Brewfile" "$HOME/Brewfile"
 
 # Install Tmux Plugin Manager
-if [ ! -d "$HOME/.config/tmux/.tmux/plugins/tpm" ]; then
+if [ ! -d "$DOTFILES_DIR/.config/tmux/.tmux/plugins/tpm" ]; then
     echo -e "${YELLOW}Installing Tmux Plugin Manager...${NC}"
-    git clone https://github.com/tmux-plugins/tpm "$HOME/.config/tmux/.tmux/plugins/tpm"
+    git clone https://github.com/tmux-plugins/tpm "$DOTFILES_DIR/.config/tmux/.tmux/plugins/tpm"
     echo -e "${GREEN}Tmux Plugin Manager installed${NC}"
 else
     echo -e "${GREEN}Tmux Plugin Manager already installed${NC}"
@@ -198,7 +213,7 @@ setup_additional_configs
 
 # Install Tmux plugins
 echo -e "${YELLOW}Installing Tmux plugins...${NC}"
-"$HOME/.config/tmux/.tmux/plugins/tpm/bin/install_plugins"
+"$DOTFILES_DIR/.config/tmux/.tmux/plugins/tpm/bin/install_plugins"
 echo -e "${GREEN}Tmux plugins installed${NC}"
 
 echo -e "${GREEN}Installation completed!${NC}"

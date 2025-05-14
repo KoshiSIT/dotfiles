@@ -7,7 +7,8 @@ function M.apply_custom_highlights()
     vim.api.nvim_set_hl(0, "BufferCurrentMod", { fg = "#0000ff", bg = current_bg_hl })
     vim.api.nvim_set_hl(0, "BufferTabpageFill", { bg = "NONE" })
     vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#00bfff', bg = 'NONE' })
-
+    vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
+    vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE", ctermbg = "NONE" })
 
     vim.api.nvim_create_autocmd("FileType", {
         pattern = "NvimTree",

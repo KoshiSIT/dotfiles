@@ -85,7 +85,7 @@ local config = function()
                     show_colors = true,           -- 色を表示するオプション
                     show_loading = true           -- 読み込み中の表示オプション
                 },
-                require('lualine/cc-component'),
+                -- require('lualine/cc-component'),
                 'encoding',
                 'fileformat',
                 'filetype',
