@@ -1,7 +1,5 @@
 tap "gromgit/fuse"
 tap "heroku/brew"
-tap "homebrew/bundle"
-tap "homebrew/services"
 tap "jstkdng/programs"
 tap "laishulu/homebrew"
 tap "zegervdv/zathura"
