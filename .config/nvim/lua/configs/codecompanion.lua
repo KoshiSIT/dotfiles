@@ -11,7 +11,7 @@ local config = function()
                 adapter = 'copilot',
                 keymaps = {
                     send = {
-                        modes = { n = "<C-CR>", i = "<C-CR>" },
+                    modes = { n = "<C-CR>", i = "<C-CR>" },
                     },
                     close = {
                         modes = { n = "ccc", i = "ccc" },

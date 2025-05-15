@@ -24,9 +24,6 @@ config.window_decorations = "RESIZE"
 config.hide_tab_bar_if_only_one_tab = true
 config.macos_window_background_blur = 30
 
--- Enable kitty keyboard protocol to fix Ctrl+Enter issues
-config.enable_kitty_keyboard = true
-
 -- Connect to the most recently used tmux session at startup, or start a new one
 config.default_prog = {
     '/bin/zsh',
@@ -36,18 +33,17 @@ config.default_prog = {
 
 -- Key binding settings
 config.keys = {
-    -- Custom key binding for Ctrl+Enter
     {
-        key = 'Enter',
-        mods = 'CTRL',
-        action = wezterm.action.SendString('\x1b[13;5u'),
+      key = 'Enter',
+      mods = 'CTRL',
+      action = wezterm.action.SendString('\x1b[13;5u'),
     },
-    -- You can add other key bindings here
-}
+  }
 
 config.colors = {
     compose_cursor = 'rgba(0, 0, 0, 0)',
 }
+
 local mux = wezterm.mux
 wezterm.on("gui-startup", function(cmd)
     local tab, pane, window = mux.spawn_window(cmd or {})
