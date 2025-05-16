@@ -79,23 +79,23 @@ require("lazy").setup({
         end
     },
     {
-        "mason-org/mason.nvim"
+        'williamboman/mason.nvim',
     },
-    -- {
-    --     "williamboman/mason-lspconfig.nvim",
-    --     dependencies = {
-    --         { "williamboman/mason.nvim" },
-    --         { "neovim/nvim-lspconfig" },
-    --         { "hrsh7th/nvim-cmp" },
-    --         { "hrsh7th/cmp-nvim-lsp" },
-    --         { "hrsh7th/cmp-buffer" },
-    --         { "hrsh7th/cmp-path" },
-    --         { "nvim-lua/plenary.nvim" },
-    --         { "nvimtools/none-ls.nvim" },
-    --         { "jay-babu/mason-null-ls.nvim" },
-    --     },
-    --     config = require("configs.mason-lspconfig"),
-    -- },
+    {
+        "williamboman/mason-lspconfig.nvim",
+        dependencies = {
+            { "williamboman/mason.nvim" },
+            { "neovim/nvim-lspconfig" },
+            { "hrsh7th/nvim-cmp" },
+            { "hrsh7th/cmp-nvim-lsp" },
+            { "hrsh7th/cmp-buffer" },
+            { "hrsh7th/cmp-path" },
+            { "nvim-lua/plenary.nvim" },
+            { "nvimtools/none-ls.nvim" },
+            { "jay-babu/mason-null-ls.nvim" },
+        },
+        config = require("configs.mason-lspconfig"),
+    },
     {
         "L3MON4D3/LuaSnip",
         config = require("configs.luaSnip"),
@@ -186,6 +186,7 @@ require("lazy").setup({
     {
         "folke/noice.nvim",
         event = "VeryLazy",
+        version = "4.4.7",
         opts = {
             -- add any options here
         },

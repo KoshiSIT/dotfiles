@@ -7,6 +7,9 @@ function M.apply_custom_highlights()
     vim.api.nvim_set_hl(0, "BufferCurrentMod", { fg = "#0000ff", bg = current_bg_hl })
     vim.api.nvim_set_hl(0, "BufferTabpageFill", { bg = "NONE" })
     vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#00bfff', bg = 'NONE' })
+    vim.api.nvim_set_hl(0, "TabLine", { bg = "NONE", ctermbg = "NONE" })
+    vim.api.nvim_set_hl(0, "TabLineFill", { bg = "NONE", ctermbg = "NONE" })
+    vim.api.nvim_set_hl(0, "TabLineSel", { bg = "NONE", ctermbg = "NONE", bold = true })
     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
     vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE", ctermbg = "NONE" })
 
@@ -54,7 +57,7 @@ M.setup = function()
         group = vim.api.nvim_create_augroup("CustomBufWinEnterCommands", { clear = true }),
         callback = function()
             -- バッファ表示時にも実行
-            M.apply_custom_highlights()
+            vim.defer_fn(M.apply_custom_highlights, 300)
         end
     })
 
@@ -66,18 +69,4 @@ end
 M.setup()
 
 -- モジュールを返す
-return M -- vim.defer_fn(function()
---     -- ここにプラグインのロード後に実行したい処理を書く
---     local current_bg_hl = "#ffffff"
---     vim.api.nvim_set_hl(0, "BufferCurrent", { fg = "#000000", bg = current_bg_hl })    -- すべてのDevIcon関連のハイライトグループを取得
---     local highlight_groups = vim.fn.getcompletion('DevIcon', 'highlight')
---
---     -- 取得したハイライトグループに対してループ処理
---     for _, group in ipairs(highlight_groups) do
---         -- 'Current'を含むハイライトグループを対象に背景色をnoneに設定
---         local current_hl = vim.api.nvim_get_hl_by_name(group, true)
---         if group:find('Current') then
---             vim.api.nvim_set_hl(0, group, {fg = current_hl.foreground, bg = current_bg_hl})
---         end
---     end
--- end, 1000) -- 100ミリ秒後に実行
+return M

@@ -2,8 +2,8 @@ local config = function()
     local lspconfig = require("lspconfig")
     local cmp = require 'cmp'
     local null_ls = require("null-ls")
-    -- require("mason").setup()
-    vim.opt.pumblend = 0
+    require("mason").setup()
+         vim.opt.pumblend = 0
     vim.opt.winblend = 0
     cmp.setup({
         snippet = {
