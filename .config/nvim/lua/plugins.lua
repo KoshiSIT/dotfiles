@@ -186,9 +186,9 @@ require("lazy").setup({
     {
         "folke/noice.nvim",
         event = "VeryLazy",
-        version = "4.4.7",
         opts = {
             -- add any options here
+            -- debug = true,
         },
         dependencies = {
             -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
@@ -247,10 +247,10 @@ require("lazy").setup({
     },
     {
         "Davidyz/VectorCode",
-        version = "*", -- optional, depending on whether you're on nightly or release
+        version = "*",      -- optional, depending on whether you're on nightly or release
         dependencies = { "nvim-lua/plenary.nvim" },
         cmd = "VectorCode", -- if you're lazy-loading VectorCode
-    }                 -- {
+    }                       -- {
     --     "preservim/nerdtree",
     --     dependencies = {
     --     },

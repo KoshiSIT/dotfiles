@@ -40,6 +40,7 @@ config.keys = {
     },
   }
 
+config.enable_kitty_keyboard = true
 config.colors = {
     compose_cursor = 'rgba(0, 0, 0, 0)',
 }

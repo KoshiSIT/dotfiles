@@ -1,17 +1,24 @@
 local config = function()
+    local spinner = require("../extentions/spinner")
+    spinner:init()
     require('codecompanion').setup({
         strategies = {
             chat = {
                 roles = {
                     llm = function(adapter)
-                        return "  CodeCompanion (" .. adapter.formatted_name .. ")"
+                        return "  CodeCompanion (" .. adapter.formatted_name .. ")"
                     end,
                     user = "󰙄  Koshi",
                 },
                 adapter = 'copilot',
                 keymaps = {
                     send = {
-                    modes = { n = "<C-s>", i = "<C-s>" },
+                        callback = function(chat)
+                            vim.cmd("stopinsert")
+                            chat:add_buf_message({ role = "llm", content = "" })
+                            chat:submit()
+                        end,
+                        modes = { n = "<C-s>", i = "<C-s>" },
                     },
                     close = {
                         modes = { n = "ccc", i = "ccc" },
@@ -53,7 +60,7 @@ local config = function()
             chat = {
                 -- Change the default icons
                 icons = {
-                    pinned_buffer = " ",
+                    pinned_buffer = " ",
                     watched_buffer = "👀 ",
                 },
                 show_header_separator = true,
@@ -65,7 +72,7 @@ local config = function()
                     height = vim.o.lines - 2,
                 },
                 action_palette = {
-                    -- プロバイダーの選択（"default", "telescope", "mini_pick"のいずれか）
+                    -- Provider selection ("default", "telescope", or "mini_pick")
                     provider = "telescope",
 
                 },
@@ -120,27 +127,27 @@ local config = function()
             telescope_provider.picker = function(self, items, opts)
                 opts = opts or {}
 
-                -- 名前の最大長を計算
+                -- Calculate the maximum name length
                 local max_name = 1
                 for _, item in ipairs(items) do
                     max_name = math.max(max_name, #item.name)
                 end
 
-                -- 表示レイアウトを作成 - 3列レイアウト
+                -- Create display layout - 3 column layout
                 local displayer = require("telescope.pickers.entry_display").create({
-                    separator = " │ ", -- 区切り文字を追加
+                    separator = " │ ", -- Add separator character
                     items = {
                         { width = max_name + 1 },
-                        { width = 12 },       -- カテゴリ/タイプの列（適宜調整）
-                        { remaining = true }, -- 説明用に残りのスペースを使用
+                        { width = 12 },       -- Column for category/type (adjust as needed)
+                        { remaining = true }, -- Use remaining space for description
                     },
                 })
 
-                -- 表示フォーマット関数
+                -- Display formatting function
                 local function make_display(entry)
                     local item = entry.value
                     local description = item.description or ""
-                    -- 説明が長すぎる場合は切り詰める
+                    -- Truncate description if it's too long
                     if #description > 50 then
                         description = description:sub(1, 47) .. "..."
                     end
@@ -182,16 +189,16 @@ local config = function()
             slash_telescope.new = function(opts)
                 local instance = original_new(opts)
 
-                -- オリジナルのメソッドを保存
+                -- Save the original method
                 local original_display = instance.display
 
-                -- find_filesの呼び出し部分を直接オーバーライド
+                -- Directly override the find_files call part
                 local original_provider = instance.provider
                 instance.provider = setmetatable({}, {
                     __index = function(_, key)
                         if key == "find_files" then
                             return function(options)
-                                -- オプションにプレビューを無効化する設定を追加
+                                -- Add settings to disable preview in options
                                 options = options or {}
                                 options.previewer = false
                                 return original_provider.find_files(options)
@@ -201,12 +208,12 @@ local config = function()
                     end
                 })
 
-                -- display メソッドをオーバーライド
+                -- Override the display method
                 instance.display = function(self)
                     local attach_mappings = original_display(self)
 
                     return function(prompt_bufnr, map)
-                        -- オリジナルのマッピングを適用
+                        -- Apply original mappings
                         if attach_mappings then
                             attach_mappings(prompt_bufnr, map)
                         end
