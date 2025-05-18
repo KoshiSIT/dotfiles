@@ -15,6 +15,6 @@ vim.opt.rtp:prepend(lazypath)
 vim.opt.termguicolors = true
 require("plugins")
 require("options")
-require("color_sheme")
+require("color_scheme")
 require("functions")
 -- vim.api.nvim_set_hl(0, "BufferCurrent", {fg = "#000000", bg = "#ffffff"})

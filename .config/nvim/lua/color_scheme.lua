@@ -48,7 +48,7 @@ M.setup = function()
         group = vim.api.nvim_create_augroup("CustomVimEnterCommands", { clear = true }),
         callback = function()
             -- 初回起動時は少し長めの遅延で実行
-            vim.defer_fn(M.apply_custom_highlights, 300)
+            vim.defer_fn(M.apply_custom_highlights, 100)
             -- vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = "#171d1f" })
         end
     })
@@ -57,7 +57,7 @@ M.setup = function()
         group = vim.api.nvim_create_augroup("CustomBufWinEnterCommands", { clear = true }),
         callback = function()
             -- バッファ表示時にも実行
-            vim.defer_fn(M.apply_custom_highlights, 300)
+            vim.defer_fn(M.apply_custom_highlights, 100)
         end
     })
 
