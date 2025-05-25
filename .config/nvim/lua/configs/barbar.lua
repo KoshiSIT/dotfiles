@@ -22,6 +22,9 @@ local config = function()
             },
             ['neo-tree'] = { event = 'BufWinLeave' },
         },
+        hide = {
+            inactive = true,
+        },
         icons = {
             button = '',
         },

@@ -3,7 +3,7 @@ local config = function()
     local cmp = require 'cmp'
     local null_ls = require("null-ls")
     require("mason").setup()
-         vim.opt.pumblend = 0
+    vim.opt.pumblend = 0
     vim.opt.winblend = 0
     cmp.setup({
         snippet = {
@@ -39,11 +39,12 @@ local config = function()
             { name = 'buffer' },
         })
     })
+
     require('mason-lspconfig').setup({
         ensure_installed = { "pyright", "clangd", "lua_ls", "rust_analyzer", "texlab", "html" },
     })
     require('mason-null-ls').setup({
-        ensure_installed = { "black", "prettier" },
+        ensure_installed = { "black", "prettier", "rustfmt" },
         automatic_installation = true,
     })
     null_ls.setup({
@@ -79,11 +80,13 @@ local config = function()
             vim.keymap.set('n', 'g[', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
         end
     })
-
-    vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-        vim.lsp.diagnostic.on_publish_diagnostics, {
-            virtual_text = false,
-        }
-    )
+    vim.diagnostic.config({
+        virtual_text = {
+            format = function(diagnostic)
+                return string.format("%s (%s: %s)", diagnostic.message, diagnostic.source, diagnostic.code)
+            end,
+        },
+        virtual_lines = true,
+    })
 end
 return config

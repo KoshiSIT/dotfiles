@@ -13,15 +13,18 @@ local config = function()
                 adapter = 'copilot',
                 keymaps = {
                     send = {
-                        callback = function(chat)
-                            vim.cmd("stopinsert")
-                            chat:add_buf_message({ role = "llm", content = "" })
-                            chat:submit()
-                        end,
-                        modes = { n = "<C-s>", i = "<C-s>" },
+                        -- callback = function(chat)
+                        --     vim.cmd("stopinsert")
+                        --     chat:add_buf_message({ role = "llm", content = "" })
+                        --     chat:submit()
+                        -- end,
+                        modes = {
+                            n = "<C-CR>", -- Ctrl+Enter
+                            i = "<C-CR>", -- Ctrl+Enter
+                        },
                     },
                     close = {
-                        modes = { n = "ccc", i = "ccc" },
+                        modes = { n = "cc", i = "cc" },
                     },
                 },
             },
@@ -35,19 +38,22 @@ local config = function()
                 adapter = 'copilot',
             },
         },
-        -- extensions = {
-        --     vectorcode = {
-        --         opts = {
-        --             add_tool = true,
-        --         }
-        --     }
-        -- },
+        extensions = {
+            vectorcode = {
+                opts = {
+                    add_tool = true, add_slash_command = true, tool_opts = {}
+                }
+            }
+        },
         adapters = {
             copilot = function()
                 return require("codecompanion.adapters").extend("copilot", {
                     schema = {
                         model = {
-                            default = "claude-3.7-sonnet",
+                            default = "claude-3.7-sonnet"
+                        },
+                        max_tokens = {
+                            default = 100000,
                         },
                     }
                 })
@@ -110,13 +116,13 @@ local config = function()
         },
     })
 
-    -- vim.api.nvim_create_autocmd("FileType", {
-    --     pattern = "CodeCompanionChat",
-    --     callback = function()
-    --         vim.cmd("wincmd L")
-    --         vim.cmd("vertical resize 50")
-    --     end
-    -- })
+    vim.api.nvim_create_autocmd("FileType", {
+        pattern = "CodeCompanionChat",
+        callback = function()
+            vim.cmd("wincmd L")
+            vim.cmd("vertical resize 50")
+        end
+    })
 
     vim.api.nvim_create_autocmd("VimEnter", {
         callback = function()

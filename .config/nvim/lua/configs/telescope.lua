@@ -5,7 +5,19 @@ local config = function()
 
     -- Telescopeの設定
     telescope.setup({
-        defaults = themes.get_dropdown()
+        defaults = themes.get_dropdown(),
+        pickers = {
+            find_files = {
+                hidden = true
+            },
+            live_grep = {
+                hidden = true
+            },
+            buffers = {
+                hidden = true
+            }
+        }
+
     })
 
     local builtin = require('telescope.builtin')
