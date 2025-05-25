@@ -28,18 +28,8 @@ config.macos_window_background_blur = 30
 config.default_prog = {
     '/bin/zsh',
     '-c',
-    'LATEST=$(/opt/homebrew/bin/tmux list-sessions -F "#{session_last_attached} #{session_name}" | sort -nr | head -n1 | cut -d" " -f2) && (/opt/homebrew/bin/tmux attach -t "$LATEST" || /opt/homebrew/bin/tmux)'
-}
-
--- Key binding settings
-config.keys = {
-    {
-      key = 'Enter',
-      mods = 'CTRL',
-      action = wezterm.action.SendString('\x1b[13;5u'),
-    },
-  }
-
+    'LATEST=$(/opt/homebrew/bin/tmux list-sessions -F "#{session_last_attached} #{session_name}" | sort -nr | head -n1 | cut -d" " -f2) && (/opt/homebrew/bin/tmux attach -t "$LATEST" || /opt/homebrew/bin/tmux); exec /bin/zsh'
+}-- Key binding settings
 config.enable_kitty_keyboard = true
 config.colors = {
     compose_cursor = 'rgba(0, 0, 0, 0)',
@@ -52,4 +42,3 @@ wezterm.on("gui-startup", function(cmd)
 end)
 
 return config
-
