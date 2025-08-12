@@ -226,7 +226,13 @@ local config = function()
                         api.node.run.system()
                     else
                         -- それ以外のファイルはデフォルトの動作を使用
-                        api.node.open.edit()
+                        -- api.node.open.edit()
+                        if last_win and vim.api.nvim_win_is_valid(last_win) and not is_excluded_window(last_win) then
+                            vim.api.nvim_set_current_win(last_win)
+                            vim.cmd('edit ' .. vim.fn.fnameescape(node.absolute_path))
+                        else
+                            api.node.open.edit()
+                        end
                     end
                 elseif node.type == 'directory' then
                     api.node.open.edit()
@@ -259,7 +265,7 @@ local config = function()
                     end
                 end
             end, 10)
-        end
+        end,
 
     })
 end

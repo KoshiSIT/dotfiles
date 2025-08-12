@@ -1,4 +1,4 @@
--- color_scheme.luaを以下のように修正
+-- color_scheme.lua
 local M = {}
 
 function M.apply_custom_highlights()
@@ -13,12 +13,34 @@ function M.apply_custom_highlights()
     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
     vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE", ctermbg = "NONE" })
 
+    -- Add ClaudeCode background transparency settings
+    vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "NormalNC", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "FloatTitle", { bg = "NONE" })
+
     vim.api.nvim_create_autocmd("FileType", {
         pattern = "NvimTree",
         callback = function()
             vim.opt_local.winhighlight:append("Normal:NvimTreeNormal")
-        end
+        end,
     })
+
+    -- Add autocommand for ClaudeCode
+    vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+        pattern = "*",
+        callback = function()
+            local bufname = vim.api.nvim_buf_get_name(0)
+            -- Check ClaudeCode buffer name patterns (adjust to match actual patterns)
+            if string.match(bufname, "claude") or string.match(bufname, "ClaudeCode") or string.match(bufname, "codecompanion") then
+                vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+                vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+                vim.api.nvim_win_set_option(0, "winhl", "Normal:NONE,NormalFloat:NONE")
+            end
+        end,
+    })
+
     local highlight_groups = vim.fn.getcompletion('DevIcon', 'highlight')
     for _, group in ipairs(highlight_groups) do
         local current_hl = vim.api.nvim_get_hl_by_name(group, true)
@@ -28,45 +50,44 @@ function M.apply_custom_highlights()
     end
 end
 
--- 初期化時に実行
+-- Execute on initialization
 M.setup = function()
-    -- ColorScheme自動コマンド
+    -- ColorScheme autocommand
     vim.api.nvim_create_autocmd("ColorScheme", {
         group = vim.api.nvim_create_augroup("CustomColorSchemeCommands", { clear = true }),
         callback = function()
-            -- カラースキーム適用直後に一度実行
+            -- Execute once immediately after colorscheme is applied
             M.apply_custom_highlights()
-            -- 少し遅延させてもう一度実行（プラグインの遅延読み込みに対応）
+            -- Execute again with delay (to handle plugin lazy loading)
             vim.defer_fn(M.apply_custom_highlights, 100)
             -- vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = "#171d1f" })
-        end
+        end,
     })
 
-    -- VimEnter自動コマンド（初回起動時用）
+    -- VimEnter autocommand (for initial startup)
     vim.api.nvim_create_autocmd("VimEnter", {
-
         group = vim.api.nvim_create_augroup("CustomVimEnterCommands", { clear = true }),
         callback = function()
-            -- 初回起動時は少し長めの遅延で実行
+            -- Execute with longer delay on initial startup
             vim.defer_fn(M.apply_custom_highlights, 100)
             -- vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = "#171d1f" })
-        end
+        end,
     })
 
     vim.api.nvim_create_autocmd("BufWinEnter", {
         group = vim.api.nvim_create_augroup("CustomBufWinEnterCommands", { clear = true }),
         callback = function()
-            -- バッファ表示時にも実行
+            -- Execute when buffer is displayed
             vim.defer_fn(M.apply_custom_highlights, 100)
-        end
+        end,
     })
 
-    -- 設定適用を確実にするため即時実行も行う
+    -- Execute immediately to ensure settings are applied
     M.apply_custom_highlights()
 end
 
--- 初期化を実行
+-- Execute initialization
 M.setup()
 
--- モジュールを返す
+-- Return module
 return M

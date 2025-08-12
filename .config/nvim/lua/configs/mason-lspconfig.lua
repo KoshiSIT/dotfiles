@@ -37,15 +37,41 @@ local config = function()
             -- { name = 'snippy' }, -- For snippy users.
         }, {
             { name = 'buffer' },
-        })
+        }),
     })
 
     require('mason-lspconfig').setup({
-        ensure_installed = { "pyright", "clangd", "lua_ls", "rust_analyzer", "texlab", "html" },
+        ensure_installed = { "pyright", "clangd", "lua_ls",
+            "rust_analyzer", "texlab", "html", "ts_ls" },
     })
     require('mason-null-ls').setup({
         ensure_installed = { "black", "prettier", "rustfmt" },
         automatic_installation = true,
+    })
+    lspconfig.lua_ls.setup({
+        settings = {
+            Lua = {
+                runtime = {
+                    version = 'LuaJIT',
+                    path = vim.split(package.path, ';'), -- ★ 追加
+                },
+                diagnostics = {
+                    globals = { 'vim' },
+                    disable = { 'undefined-global', 'lowercase-global' }, -- ★ 追加
+                },
+                workspace = {
+                    library = vim.api.nvim_get_runtime_file("", true),
+                    checkThirdParty = false,
+                    preloadFileSize = 10000, -- ★ 追加
+                },
+                telemetry = {
+                    enable = false,
+                },
+                completion = {
+                    callSnippet = "Replace", -- ★ 追加
+                },
+            },
+        },
     })
     null_ls.setup({
         sources = {
@@ -78,7 +104,7 @@ local config = function()
             vim.keymap.set('n', 'ge', '<cmd>lua vim.diagnostic.open_float()<CR>')
             vim.keymap.set('n', 'g]', '<cmd>lua vim.diagnostic.goto_next()<CR>')
             vim.keymap.set('n', 'g[', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
-        end
+        end,
     })
     vim.diagnostic.config({
         virtual_text = {

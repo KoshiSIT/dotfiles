@@ -4,6 +4,9 @@ local config = function()
             codecompanion = {
                 colorscheme = "nordfox",
             },
+            claudecode = {
+                colorscheme = "nordfox",
+            },
         },
     })
 end

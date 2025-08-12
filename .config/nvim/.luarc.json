@@ -1,0 +1,53 @@
+{
+  "runtime": {
+    "version": "LuaJIT",
+    "path": ["?.lua", "?/init.lua", "./lua/?.lua", "./lua/?/init.lua"]
+  },
+  "diagnostics": {
+    "globals": [
+      "vim",
+      "describe",
+      "it",
+      "before_each",
+      "after_each",
+      "pending",
+      "setup",
+      "teardown"
+    ],
+    "disable": ["undefined-global", "lowercase-global"],
+    "severity": {
+      "undefined-global": "Information"
+    }
+  },
+  "workspace": {
+    "library": ["${3rd}/luv/library", "${3rd}/busted/library"],
+    "checkThirdParty": false,
+    "maxPreload": 5000,
+    "preloadFileSize": 10000
+  },
+  "completion": {
+    "enable": true,
+    "callSnippet": "Replace",
+    "keywordSnippet": "Replace",
+    "displayContext": 6,
+    "workspaceWord": true,
+    "showWord": "Fallback"
+  },
+  "format": {
+    "enable": true,
+    "defaultConfig": {
+      "indent_style": "space",
+      "indent_size": "2",
+      "max_line_length": "120",
+      "trailing_table_separator": "smart"
+    }
+  },
+  "hint": {
+    "enable": false,
+    "paramType": false,
+    "setType": false
+  },
+  "telemetry": {
+    "enable": false
+  }
+}

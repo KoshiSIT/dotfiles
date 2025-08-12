@@ -14,10 +14,10 @@ require("lazy").setup({
     --     "stevearc/aerial.nvim",
     --     config = require("configs.aerial")
     -- },
-    {
-        "hedyhli/outline.nvim",
-        config = require("configs.outline"),
-    },
+    -- {
+    --     "hedyhli/outline.nvim",
+    --     config = require("configs.outline"),
+    -- },
     {
         "EdenEast/nightfox.nvim",
         config = require("configs.nightfox"),
@@ -56,6 +56,7 @@ require("lazy").setup({
     },
     {
         "nvim-treesitter/nvim-treesitter",
+        priority = 1000,
         config = require("configs.nvim-treesitter"),
     },
     {
@@ -80,7 +81,7 @@ require("lazy").setup({
                     extra = false,
                 },
             })
-        end
+        end,
     },
     {
         'williamboman/mason.nvim',
@@ -128,56 +129,7 @@ require("lazy").setup({
             require("im_select").setup({})
         end,
     },
-    -- {
-    --     "shellRaining/hlchunk.nvim",
-    --     event = { "BufReadPre", "BufNewFile" },
-    --     config = function()
-    --         require("hlchunk").setup({
-    --             -- 各モジュールの基本設定
-    --             chunk = {
-    --                 enable = true, -- chunkモジュールを有効化
-    --                 exclude_filetypes = {
-    --                     dashboard = true,
-    --                     text = true,
-    --                     markdown = true,
-    --                     help = true,
-    --                     NvimTree = true,
-    --                 },
-    --                 support_filetypes = {
-    --                     -- 対応するファイルタイプを指定 (デフォルトはすべて)
-    --                 },
-    --                 priority = 2000, -- 表示優先度 (高いほど優先)
-    --             },
-    --             indent = {
-    --                 enable = true, -- インデントガイド表示を有効化
-    --                 exclude_filetypes = {
-    --                     help = true,
-    --                     dashboard = true,
-    --                     NvimTree = true,
-    --                 },
-    --                 priority = 1000, -- 表示優先度
-    --             },
-    --             line_num = {
-    --                 enable = true, -- 行番号ハイライトを有効化
-    --                 exclude_filetypes = {
-    --                     help = true,
-    --                     dashboard = true,
-    --                     NvimTree = true,
-    --                 },
-    --                 priority = 0, -- 表示優先度
-    --             },
-    --             blank = {
-    --                 enable = true, -- 空白文字の可視化を有効化
-    --                 exclude_filetypes = {
-    --                     help = true,
-    --                     dashboard = true,
-    --                     NvimTree = true,
-    --                 },
-    --                 priority = 500, -- 表示優先度
-    --             },
-    --         })
-    --     end
-    -- },
+
     {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
@@ -255,21 +207,29 @@ require("lazy").setup({
             {
                 "rcarriga/nvim-notify",
                 opts = {
-                    background_colour = "#000000", -- 背景色を設定
-                }
-            }
-        }
+                    background_colour = "#000000",
+                },
+            },
+        },
     },
+    -- {
+    --     "MeanderingProgrammer/render-markdown.nvim",
+    --     dependencies = {
+    --         "nvim-treesitter/nvim-treesitter",
+    --         "echasnovski/mini.icons"
+    --     },
+    --     ft = { "codecompanion" },
+    --     opt = {
+    --         file_types = { "codecompanion" },
+    --     },
+    -- },
     {
-        "MeanderingProgrammer/render-markdown.nvim",
+        "OXY2DEV/markview.nvim",
+        lazy = false,
         dependencies = {
             "nvim-treesitter/nvim-treesitter",
-            "echasnovski/mini.icons"
         },
-        ft = { "codecompanion" },
-        opt = {
-            file_types = { "codecompanion" },
-        },
+        config = require("configs.markview"),
     },
     {
         'cameron-wags/rainbow_csv.nvim',
@@ -281,21 +241,21 @@ require("lazy").setup({
             'csv_whitespace',
             'csv_pipe',
             'rfc_csv',
-            'rfc_semicolon'
+            'rfc_semicolon',
         },
         cmd = {
             'RainbowDelim',
             'RainbowDelimSimple',
             'RainbowDelimQuoted',
-            'RainbowMultiDelim'
-        }
+            'RainbowMultiDelim',
+        },
     },
     {
         "rebelot/kanagawa.nvim",
         config = function()
             require('kanagawa').setup({
             })
-        end
+        end,
     },
     -- {
     --     "folke/tokyonight.nvim",
@@ -334,7 +294,30 @@ require("lazy").setup({
         version = "*",      -- optional, depending on whether you're on nightly or release
         dependencies = { "nvim-lua/plenary.nvim" },
         cmd = "VectorCode", -- if you're lazy-loading VectorCode
-    },                      -- {
+    },
+    {
+        "coder/claudecode.nvim",
+        dependencies = { "folke/snacks.nvim" },
+        config = true,
+        keys = {
+            { "<leader>a",  nil,                              desc = "AI/Claude Code" },
+            { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
+            { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
+            { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
+            { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
+            { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
+            { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                 desc = "Send to Claude" },
+            {
+                "<leader>as",
+                "<cmd>ClaudeCodeTreeAdd<cr>",
+                desc = "Add file",
+                ft = { "NvimTree", "neo-tree", "oil" },
+            },
+            -- Diff management
+            { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
+            { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Deny diff" },
+        },
+    },
     {
         "folke/snacks.nvim",
         priority = 1000,
@@ -359,8 +342,8 @@ require("lazy").setup({
             styles = {
                 notification = {
                     -- wo = { wrap = true } -- Wrap notifications
-                }
-            }
+                },
+            },
         },
         keys = {
             -- Top Pickers & Explorer
@@ -452,7 +435,7 @@ require("lazy").setup({
                         },
                     })
                 end,
-            }
+            },
         },
         init = function()
             vim.api.nvim_create_autocmd("User", {
@@ -484,5 +467,5 @@ require("lazy").setup({
                 end,
             })
         end,
-    }
+    },
 })

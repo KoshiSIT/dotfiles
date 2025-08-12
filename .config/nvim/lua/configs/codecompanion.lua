@@ -38,13 +38,13 @@ local config = function()
                 adapter = 'copilot',
             },
         },
-        extensions = {
-            vectorcode = {
-                opts = {
-                    add_tool = true, add_slash_command = true, tool_opts = {}
-                }
-            }
-        },
+        -- extensions = {
+        --     vectorcode = {
+        --         opts = {
+        --             add_tool = true, add_slash_command = true, tool_opts = {}
+        --         }
+        --     }
+        -- },
         adapters = {
             copilot = function()
                 return require("codecompanion.adapters").extend("copilot", {
@@ -53,7 +53,7 @@ local config = function()
                             default = "claude-3.7-sonnet"
                         },
                         max_tokens = {
-                            default = 100000,
+                            default = 1000000,
                         },
                     }
                 })

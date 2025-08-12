@@ -16,5 +16,4 @@ vim.opt.termguicolors = true
 require("plugins")
 require("options")
 require("color_scheme")
-require("functions")
 -- vim.api.nvim_set_hl(0, "BufferCurrent", {fg = "#000000", bg = "#ffffff"})
