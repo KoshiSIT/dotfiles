@@ -112,3 +112,5 @@ alias pwdc='pwd | pbcopy && pwd'
 export PATH="/opt/homebrew/opt/libomp/bin:$PATH"
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+# Neovim (bob)
+[ -f "$HOME/.local/share/bob/env/env.sh" ] && . "$HOME/.local/share/bob/env/env.sh"

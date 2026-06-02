@@ -25,6 +25,11 @@ BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 echo -e "${YELLOW}Created backup directory: $BACKUP_DIR${NC}"
 
+# Neovim version to install via bob.
+# Pinned to the 0.11 series for compatibility with the nvim-treesitter
+# "master" branch (the "main" branch requires Neovim 0.12 + tree-sitter CLI).
+NVIM_VERSION="0.11.4"
+
 # Function to create symlinks
 create_symlink() {
     local src="$1"
@@ -259,6 +264,39 @@ install_mise_runtimes() {
     fi
 }
 
+# Setup Neovim via the bob version manager.
+# Neovim is managed by bob (installed through the Brewfile), NOT by Homebrew,
+# so we can pin a specific version. The PATH to bob's nvim binary is expected
+# to be exported from the dotfiles' .zshenv:
+#   export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+# This function only installs and selects the pinned version; it is idempotent
+# and re-running it triggers no extra downloads once the version is active.
+setup_neovim() {
+    local bob_nvim="$HOME/.local/share/bob/nvim-bin/nvim"
+
+    if ! command -v bob &> /dev/null; then
+        echo -e "${RED}bob not found. Skipping Neovim setup. (Check that the Brewfile installed bob)${NC}"
+        return 1
+    fi
+
+    # Idempotency: if the pinned version is already active, do nothing.
+    if [ -x "$bob_nvim" ] && "$bob_nvim" --version 2>/dev/null | head -n 1 | grep -q "v${NVIM_VERSION}"; then
+        echo -e "${GREEN}Neovim ${NVIM_VERSION} already active${NC}"
+        return 0
+    fi
+
+    echo -e "${YELLOW}Installing Neovim ${NVIM_VERSION} via bob...${NC}"
+    bob install "${NVIM_VERSION}"
+    bob use "${NVIM_VERSION}"
+
+    if [ -x "$bob_nvim" ] && "$bob_nvim" --version &> /dev/null; then
+        echo -e "${GREEN}Neovim setup completed: $("$bob_nvim" --version | head -n 1)${NC}"
+    else
+        echo -e "${RED}Neovim setup failed. Check bob output above.${NC}"
+        return 1
+    fi
+}
+
 # Main execution
 
 # Install Homebrew
@@ -271,6 +309,9 @@ echo -e "${GREEN}Brewfile installation completed${NC}"
 
 # Install runtimes via mise (Brewfile already installed mise)
 install_mise_runtimes
+
+# Setup Neovim via bob (Brewfile already installed bob)
+setup_neovim
 
 # Initialize additional settings
 echo -e "${BLUE}==== Initializing additional settings ====${NC}"
