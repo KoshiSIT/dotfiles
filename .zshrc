@@ -78,6 +78,31 @@ fi
 source ${ZDOTDIR:-$HOME}/.zoxide.zsh
 
 # ────────────────────────────────────────────────────────────────
+# ghq repository selector
+# ────────────────────────────────────────────────────────────────
+function gcd() {
+  local dir
+
+  if ! command -v ghq >/dev/null 2>&1; then
+    printf "gcd: ghq is not installed\n" >&2
+    return 1
+  fi
+
+  if ! command -v fzf >/dev/null 2>&1; then
+    printf "gcd: fzf is not installed\n" >&2
+    return 1
+  fi
+
+  dir="$(
+    ghq list -p |
+      fzf --height=50% --layout=reverse --prompt='ghq> ' \
+          --preview='git -C {} status --short --branch 2>/dev/null'
+  )" || return
+
+  [[ -n "$dir" ]] && cd "$dir"
+}
+
+# ────────────────────────────────────────────────────────────────
 # peco history search (Ctrl+R)
 # ────────────────────────────────────────────────────────────────
 function peco-history-selection() {
