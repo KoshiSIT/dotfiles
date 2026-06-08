@@ -152,8 +152,12 @@ create_symlink "$DOTFILES_DIR/.config/nvim" "$HOME/.config/nvim"
 # Link Wezterm configuration
 create_symlink "$DOTFILES_DIR/term/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
 
-# Link mise configuration
-create_symlink "$DOTFILES_DIR/.config/mise/config.toml" "$HOME/.config/mise/config.toml"
+# Link local mise configuration when present
+if [ -f "$DOTFILES_DIR/.config/mise/config.toml" ]; then
+    create_symlink "$DOTFILES_DIR/.config/mise/config.toml" "$HOME/.config/mise/config.toml"
+else
+    echo -e "${YELLOW}Skipping mise configuration link: local config not found${NC}"
+fi
 
 # Link Brewfile
 create_symlink "$DOTFILES_DIR/Brewfile" "$HOME/Brewfile"

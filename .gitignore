@@ -5,3 +5,6 @@
 
 # Claude snapshots
 .claude-snapshots/
+
+# Local mise configuration
+.config/mise/config.toml
