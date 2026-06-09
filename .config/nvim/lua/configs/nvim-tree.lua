@@ -148,6 +148,10 @@ local config = function()
                 enable = false,
             },
         },
+        filters = {
+            git_ignored = false,
+            dotfiles = false,
+        },
         renderer = {
             full_name = true,
             group_empty = true,
