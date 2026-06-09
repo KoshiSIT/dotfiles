@@ -255,6 +255,17 @@ require("lazy").setup({
         config = require("configs.styler"),
     },
     {
+        "stevearc/profile.nvim",
+        lazy = vim.env.NVIM_PROFILE == nil,
+        cmd = {
+            "NvimProfileStart",
+            "NvimProfileStop",
+            "NvimProfileToggle",
+            "NvimProfilePath",
+        },
+        config = require("configs.profile"),
+    },
+    {
         "Davidyz/VectorCode",
         version = "*",      -- optional, depending on whether you're on nightly or release
         dependencies = { "nvim-lua/plenary.nvim" },

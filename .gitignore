@@ -8,3 +8,7 @@
 
 # Local mise configuration
 .config/mise/config.toml
+
+# Local Neovim profiling artifacts
+.nvim-profiles/
+.nvimlog
