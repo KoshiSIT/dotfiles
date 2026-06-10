@@ -13,6 +13,24 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 vim.opt.termguicolors = true
+
+local function prepend_path(path)
+    if vim.fn.isdirectory(path) == 0 then
+        return
+    end
+
+    local current_path = vim.env.PATH or ""
+    for entry in string.gmatch(current_path, "([^:]+)") do
+        if entry == path then
+            return
+        end
+    end
+
+    vim.env.PATH = path .. ":" .. current_path
+end
+
+prepend_path(vim.fn.expand("~/.local/share/mise/shims"))
+
 require("plugins")
 require("options")
 require("color_scheme")

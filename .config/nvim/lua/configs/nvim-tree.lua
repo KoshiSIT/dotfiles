@@ -1,8 +1,78 @@
 local config = function()
     local nvim_tree = require('nvim-tree')
+    local tree_api = require('nvim-tree.api')
 
     -- 前回のウィンドウIDを保存する変数
     local last_win = nil
+    local tree_width = {
+        base_min = 30,
+        current = 30,
+        padding = 2,
+        skip_next_render_resize = false,
+    }
+
+    local function get_tree_max_width()
+        return math.max(tree_width.base_min, math.floor(vim.o.columns * 0.5))
+    end
+
+    local function get_tree_content_width(bufnr, winid)
+        if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+            return tree_width.base_min
+        end
+
+        local padding = tree_width.padding
+        local wininfo = vim.fn.getwininfo(winid)
+        if type(wininfo) == "table" and type(wininfo[1]) == "table" then
+            padding = padding + (wininfo[1].textoff or 0)
+        end
+
+        local final_width = tree_width.base_min
+        local max_width = get_tree_max_width()
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        local ns_id = vim.api.nvim_get_namespaces()["NvimTreeExtmarks"]
+
+        for i, line in ipairs(lines) do
+            local line_width = vim.fn.strchars(line)
+
+            if ns_id then
+                local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, ns_id, { i - 1, 0 }, { i - 1, -1 }, { details = true })
+                for _, extmark in ipairs(extmarks) do
+                    local details = extmark[4]
+                    if details and details.virt_text then
+                        for _, text in ipairs(details.virt_text) do
+                            line_width = line_width + vim.fn.strchars(text[1])
+                        end
+                    end
+                end
+            end
+
+            final_width = math.max(final_width, line_width + padding)
+            if final_width >= max_width then
+                return max_width
+            end
+        end
+
+        return final_width
+    end
+
+    local function apply_tree_width(width, winid)
+        if not winid or not vim.api.nvim_win_is_valid(winid) then
+            return
+        end
+
+        local target_width = math.min(math.max(width, tree_width.base_min), get_tree_max_width())
+        tree_width.current = target_width
+
+        if vim.api.nvim_win_get_width(winid) == target_width then
+            return
+        end
+
+        vim.api.nvim_win_set_width(winid, target_width)
+    end
+
+    local function sync_tree_width_from_content(bufnr, winid)
+        apply_tree_width(get_tree_content_width(bufnr, winid), winid)
+    end
 
 
     local function is_excluded_window(win)
@@ -138,12 +208,10 @@ local config = function()
             },
         },
         view = {
-            width = {
-                -- min = function() return math.floor(vim.opt.columns:get() * 0.15) end,
-                -- max = function() return math.floor(vim.opt.columns:get() * 0.15) end,
-                min = 30,
-                max = 30,
-            },
+            preserve_window_proportions = true,
+            width = function()
+                return tree_width.current
+            end,
             float = {
                 enable = false,
             },
@@ -253,6 +321,36 @@ local config = function()
                 end
             end, opts('Open File in Vertical Split on the Far Right')) -- highlight 設定を追加
             vim.keymap.set("n", "<C-h>", set_root_to_cursor_dir, opts("Set Root To Cursor Directory"))
+        end,
+    })
+
+    local tree_width_augroup = vim.api.nvim_create_augroup("NvimTreeWidthPersistence", { clear = true })
+
+    tree_api.events.subscribe(tree_api.events.Event.TreeRendered, function(payload)
+        if not payload then
+            return
+        end
+
+        if tree_width.skip_next_render_resize then
+            tree_width.skip_next_render_resize = false
+            tree_width.current = math.min(math.max(vim.api.nvim_win_get_width(payload.winnr), tree_width.base_min), get_tree_max_width())
+            return
+        end
+
+        sync_tree_width_from_content(payload.bufnr, payload.winnr)
+    end)
+
+    vim.api.nvim_create_autocmd("BufWritePost", {
+        group = tree_width_augroup,
+        callback = function()
+            if not tree_api.tree.winid() then
+                return
+            end
+
+            tree_width.skip_next_render_resize = true
+            vim.defer_fn(function()
+                tree_width.skip_next_render_resize = false
+            end, 500)
         end,
     })
 
