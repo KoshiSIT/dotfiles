@@ -29,6 +29,10 @@ local function prepend_path(path)
     vim.env.PATH = path .. ":" .. current_path
 end
 
+prepend_path("/opt/homebrew/bin")
+prepend_path("/opt/homebrew/sbin")
+prepend_path("/usr/local/bin")
+prepend_path("/usr/local/sbin")
 prepend_path(vim.fn.expand("~/.local/share/mise/shims"))
 
 require("plugins")

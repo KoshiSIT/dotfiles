@@ -93,20 +93,79 @@ local config = function()
         },
     })
 
+    local function open_lsp_item(item)
+        local win = vim.api.nvim_get_current_win()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local from = vim.fn.getpos(".")
+        from[1] = bufnr
+
+        vim.cmd("normal! m'")
+        vim.fn.settagstack(vim.fn.win_getid(win), {
+            items = {
+                { tagname = vim.fn.expand("<cword>"), from = from },
+            },
+        }, "t")
+
+        local target_buf = item.bufnr or vim.fn.bufadd(item.filename)
+        vim.bo[target_buf].buflisted = true
+
+        local ok, err = pcall(vim.api.nvim_win_set_buf, win, target_buf)
+        if not ok then
+            local err_msg = tostring(err)
+            if not err_msg:match("E325") and not err_msg:match("E303") then
+                vim.notify(err_msg, vim.log.levels.ERROR)
+                return
+            end
+
+            vim.bo[target_buf].swapfile = false
+            ok, err = pcall(vim.api.nvim_win_set_buf, win, target_buf)
+            if not ok then
+                vim.notify(tostring(err), vim.log.levels.ERROR)
+                return
+            end
+
+            vim.notify("Opened without swapfile because a swap file already exists", vim.log.levels.WARN)
+        end
+
+        vim.api.nvim_win_set_cursor(win, { item.lnum, math.max((item.col or 1) - 1, 0) })
+        vim.cmd("normal! zv")
+    end
+
+    local function handle_lsp_list(options)
+        if #options.items == 1 then
+            open_lsp_item(options.items[1])
+            return
+        end
+
+        vim.fn.setqflist({}, " ", options)
+        vim.cmd("botright copen")
+    end
+
+    local function lsp_location_jump(fn)
+        return function()
+            fn({
+                reuse_win = true,
+                on_list = handle_lsp_list,
+            })
+        end
+    end
+
     vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(_)
-            vim.keymap.set("n", "gh", "<cmd>lua vim.lsp.buf.hover()<CR>")
-            vim.keymap.set("n", "gf", "<cmd>lua vim.lsp.buf.format { async = true }<CR>")
-            vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>")
-            vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
-            vim.keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>")
-            vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>")
-            vim.keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>")
-            vim.keymap.set("n", "gn", "<cmd>lua vim.lsp.buf.rename()<CR>")
-            vim.keymap.set("n", "ga", "<cmd>lua vim.lsp.buf.code_action()<CR>")
-            vim.keymap.set("n", "ge", "<cmd>lua vim.diagnostic.open_float()<CR>")
-            vim.keymap.set("n", "g]", "<cmd>lua vim.diagnostic.goto_next()<CR>")
-            vim.keymap.set("n", "g[", "<cmd>lua vim.diagnostic.goto_prev()<CR>")
+        callback = function(args)
+            local opts = { buffer = args.buf, noremap = true, silent = true }
+
+            vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
+            vim.keymap.set("n", "gf", function() vim.lsp.buf.format { async = true } end, opts)
+            vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+            vim.keymap.set("n", "gd", lsp_location_jump(vim.lsp.buf.definition), opts)
+            vim.keymap.set("n", "gD", lsp_location_jump(vim.lsp.buf.declaration), opts)
+            vim.keymap.set("n", "gi", lsp_location_jump(vim.lsp.buf.implementation), opts)
+            vim.keymap.set("n", "gt", lsp_location_jump(vim.lsp.buf.type_definition), opts)
+            vim.keymap.set("n", "gn", vim.lsp.buf.rename, opts)
+            vim.keymap.set("n", "ga", vim.lsp.buf.code_action, opts)
+            vim.keymap.set("n", "ge", vim.diagnostic.open_float, opts)
+            vim.keymap.set("n", "g]", vim.diagnostic.goto_next, opts)
+            vim.keymap.set("n", "g[", vim.diagnostic.goto_prev, opts)
         end,
     })
 

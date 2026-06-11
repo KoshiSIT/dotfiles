@@ -129,6 +129,50 @@ require("lazy").setup({
         "keaising/im-select.nvim",
         config = function()
             require("im_select").setup({})
+
+            local english_im = "com.apple.keylayout.ABC"
+            local macism = vim.fn.exepath("macism")
+            if macism == "" then
+                return
+            end
+
+            local group = vim.api.nvim_create_augroup("im-select-focus", { clear = true })
+            local function is_insert_like_mode(mode)
+                return type(mode) == "string" and mode:match("^[iR]") ~= nil
+            end
+
+            local function current_input_method()
+                return vim.trim(vim.fn.system({ macism }))
+            end
+
+            local function ensure_english_if_not_in_insert(mode)
+                if is_insert_like_mode(mode or vim.api.nvim_get_mode().mode) then
+                    return
+                end
+
+                local current_im = current_input_method()
+                if current_im == "" then
+                    return
+                end
+
+                vim.g.im_select_saved_state = current_im
+                if current_im ~= english_im then
+                    vim.system({ macism, english_im }, { detach = true })
+                end
+            end
+
+            vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained", "InsertLeave", "CmdlineLeave" }, {
+                group = group,
+                callback = ensure_english_if_not_in_insert,
+            })
+
+            vim.api.nvim_create_autocmd("ModeChanged", {
+                group = group,
+                callback = function(args)
+                    local mode = vim.split(args.match, ":", { plain = true })[2]
+                    ensure_english_if_not_in_insert(mode)
+                end,
+            })
         end,
     },
 

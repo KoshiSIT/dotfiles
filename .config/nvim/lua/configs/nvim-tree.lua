@@ -195,7 +195,6 @@ local config = function()
     vim.keymap.set('n', '<C-s>', swap_non_tree_windows, { noremap = true, silent = true })
     vim.keymap.set('n', '<C-g>', toggle_tree_focus, { noremap = true, silent = true })
     vim.keymap.set('n', '<C-n>', move_between_non_tree_windows, { noremap = true, silent = true })
-    vim.keymap.set('n', '<C-o>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 
     -- nvim-treeの設定
     nvim_tree.setup({
