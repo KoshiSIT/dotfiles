@@ -1,4 +1,33 @@
 local config = function()
+    local function format_buffer_path(shorten)
+        local filetype = vim.bo.filetype
+        if filetype == "NvimTree" then
+            return "Explorer"
+        end
+
+        local name = vim.api.nvim_buf_get_name(0)
+        if name == "" then
+            return "[No Name]"
+        end
+
+        local path = vim.fn.fnamemodify(name, ":~:.")
+        if shorten and vim.fn.winwidth(0) < 100 then
+            return vim.fn.pathshorten(path)
+        end
+
+        return path
+    end
+
+    local function current_buffer_path()
+        return format_buffer_path(true)
+    end
+
+    local function current_buffer_path_full()
+        return format_buffer_path(false)
+    end
+
+    local transparent_component = { bg = "NONE", gui = "none" }
+
     local custom_theme = function()
         local colors = {
             deepskyblue = "#00bfff",
@@ -56,7 +85,7 @@ local config = function()
             lualine_a = { 'mode' },
             lualine_b = { 'branch' },
             lualine_c = {
-                'filename',
+                current_buffer_path,
             },
             lualine_x = {
                 {
@@ -92,6 +121,32 @@ local config = function()
             },
             lualine_y = { 'progress' },
             lualine_z = { 'location' }
+        },
+        winbar = {
+            lualine_a = {},
+            lualine_b = {},
+            lualine_c = {
+                {
+                    current_buffer_path_full,
+                    color = transparent_component,
+                },
+            },
+            lualine_x = {},
+            lualine_y = {},
+            lualine_z = {},
+        },
+        inactive_winbar = {
+            lualine_a = {},
+            lualine_b = {},
+            lualine_c = {
+                {
+                    current_buffer_path,
+                    color = transparent_component,
+                },
+            },
+            lualine_x = {},
+            lualine_y = {},
+            lualine_z = {},
         },
         -- tabline = {
         --     lualine_a = {

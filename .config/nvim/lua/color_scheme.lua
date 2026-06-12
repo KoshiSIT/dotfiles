@@ -12,6 +12,8 @@ function M.apply_custom_highlights()
     vim.api.nvim_set_hl(0, "TabLineSel", { bg = "NONE", ctermbg = "NONE", bold = true })
     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
     vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE", ctermbg = "NONE" })
+    vim.api.nvim_set_hl(0, "WinBar", { bg = "NONE", ctermbg = "NONE" })
+    vim.api.nvim_set_hl(0, "WinBarNC", { bg = "NONE", ctermbg = "NONE" })
 
     -- Add ClaudeCode background transparency settings
     vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })

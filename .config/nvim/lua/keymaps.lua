@@ -9,6 +9,25 @@ vim.api.nvim_set_keymap('i', '<C-j>', '<Down>', { noremap = true, silent = true 
 vim.api.nvim_set_keymap('i', '<C-k>', '<Up>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-n>', '<C-w>w', { noremap = true, silent = true })
 
+vim.api.nvim_create_user_command('BufferPath', function(opts)
+    local path = vim.fn.expand('%:p')
+    if path == "" then
+        vim.notify("Current buffer has no file path", vim.log.levels.INFO, { title = "BufferPath" })
+        return
+    end
+
+    if opts.bang then
+        vim.fn.setreg('+', path)
+        vim.notify("Copied current buffer path", vim.log.levels.INFO, { title = "BufferPath" })
+        return
+    end
+
+    vim.notify(path, vim.log.levels.INFO, { title = "BufferPath" })
+end, {
+    bang = true,
+    desc = "Show current buffer path (! to copy)",
+})
+
 -- Move to the end of the line in normal mode with Shift+l
 -- vim.api.nvim_set_keymap('n', '<S-h>', '^', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '<S-h>', '^', { noremap = true, silent = true })
