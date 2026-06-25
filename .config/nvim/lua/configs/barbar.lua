@@ -10,6 +10,10 @@ local config = function()
         minimum_padding = 3,
         maximum_padding = 3,
         clickable = false,
+        exclude_ft = {
+            'NvimTree',
+            'neo-tree',
+        },
         sidebar_filetypes = {
             NvimTree = {
                 enable = true,

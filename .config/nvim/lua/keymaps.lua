@@ -9,6 +9,40 @@ vim.api.nvim_set_keymap('i', '<C-j>', '<Down>', { noremap = true, silent = true 
 vim.api.nvim_set_keymap('i', '<C-k>', '<Up>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-n>', '<C-w>w', { noremap = true, silent = true })
 
+local function is_tree_buffer(bufnr)
+    if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+        return false
+    end
+
+    local filetype = vim.bo[bufnr].filetype
+    return filetype == 'NvimTree' or filetype == 'neo-tree'
+end
+
+local function cycle_buffer(command)
+    local fallback_buf = vim.api.nvim_get_current_buf()
+    local max_tries = math.max(vim.fn.bufnr('$'), 1)
+
+    for _ = 1, max_tries do
+        vim.cmd(command)
+        local current_buf = vim.api.nvim_get_current_buf()
+        if not is_tree_buffer(current_buf) then
+            return
+        end
+    end
+
+    if vim.api.nvim_buf_is_valid(fallback_buf) then
+        vim.api.nvim_set_current_buf(fallback_buf)
+    end
+end
+
+vim.keymap.set('n', '<C-o>', function()
+    cycle_buffer('bprevious')
+end, { noremap = true, silent = true, desc = 'Previous buffer (skip tree)' })
+
+vim.keymap.set('n', '<C-i>', function()
+    cycle_buffer('bnext')
+end, { noremap = true, silent = true, desc = 'Next buffer (skip tree)' })
+
 vim.api.nvim_create_user_command('BufferPath', function(opts)
     local path = vim.fn.expand('%:p')
     if path == "" then
