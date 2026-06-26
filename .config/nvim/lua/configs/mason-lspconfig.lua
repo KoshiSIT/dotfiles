@@ -1,6 +1,7 @@
 local config = function()
     local cmp = require("cmp")
     local null_ls = require("null-ls")
+    local prettier_cli = vim.fn.expand("~/.local/share/nvim/mason/packages/prettier/node_modules/prettier/bin/prettier.cjs")
     require("mason").setup()
     vim.opt.pumblend = 0
     vim.opt.winblend = 0
@@ -93,6 +94,69 @@ local config = function()
         },
     })
 
+    local function find_node_executable()
+        local node = vim.fn.exepath("node")
+        if node ~= "" then
+            return node
+        end
+
+        local candidates = vim.fn.glob(vim.fn.expand("~/.local/share/mise/installs/node/*/bin/node"), true, true)
+        table.sort(candidates)
+        return candidates[#candidates] or ""
+    end
+
+    local function format_html_with_prettier(bufnr)
+        if vim.fn.filereadable(prettier_cli) == 0 then
+            vim.notify("prettier executable was not found in Mason", vim.log.levels.ERROR)
+            return
+        end
+
+        local node = find_node_executable()
+        if node == "" then
+            vim.notify("node executable was not found for prettier", vim.log.levels.ERROR)
+            return
+        end
+
+        local input = table.concat(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false), "\n")
+        local result = vim.system(
+            { node, prettier_cli, "--parser", "html" },
+            { stdin = input, text = true }
+        ):wait()
+
+        if result.code ~= 0 then
+            vim.notify(result.stderr ~= "" and result.stderr or result.stdout, vim.log.levels.ERROR)
+            return
+        end
+
+        local output = vim.split(result.stdout, "\n", { plain = true })
+        if output[#output] == "" then
+            table.remove(output, #output)
+        end
+
+        local view = vim.fn.winsaveview()
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, output)
+        vim.fn.winrestview(view)
+    end
+
+    local function format_buffer(bufnr)
+        local clients = vim.lsp.get_clients({
+            bufnr = bufnr,
+            method = "textDocument/formatting",
+        })
+
+        if #clients > 0 then
+            vim.lsp.buf.format({ async = true, bufnr = bufnr })
+            return
+        end
+
+        if vim.bo[bufnr].filetype == "html" then
+            format_html_with_prettier(bufnr)
+            return
+        end
+
+        vim.notify("[LSP] Format request failed, no matching language servers", vim.log.levels.WARN)
+    end
+
     local function open_lsp_item(item)
         local win = vim.api.nvim_get_current_win()
         local bufnr = vim.api.nvim_get_current_buf()
@@ -155,7 +219,7 @@ local config = function()
             local opts = { buffer = args.buf, noremap = true, silent = true }
 
             vim.keymap.set("n", "gh", vim.lsp.buf.hover, opts)
-            vim.keymap.set("n", "gf", function() vim.lsp.buf.format { async = true } end, opts)
+            vim.keymap.set("n", "gf", function() format_buffer(args.buf) end, opts)
             vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
             vim.keymap.set("n", "gd", lsp_location_jump(vim.lsp.buf.definition), opts)
             vim.keymap.set("n", "gD", lsp_location_jump(vim.lsp.buf.declaration), opts)
@@ -168,6 +232,10 @@ local config = function()
             vim.keymap.set("n", "g[", vim.diagnostic.goto_prev, opts)
         end,
     })
+
+    vim.api.nvim_create_user_command("FormatHtml", function()
+        format_html_with_prettier(vim.api.nvim_get_current_buf())
+    end, { desc = "Format current buffer as HTML with prettier" })
 
     vim.diagnostic.config({
         virtual_text = {
