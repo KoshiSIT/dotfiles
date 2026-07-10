@@ -1,12 +1,10 @@
--- Helper: find app window quickly
--- (app:mainWindow() can return nil depending on the app,
---  and hs.window.filter is too slow for one-shot lookups)
-local function findAppWindow(bundleID)
-    for _, w in ipairs(hs.window.orderedWindows()) do
-        local wApp = w:application()
-        if wApp and wApp:bundleID() == bundleID then
-            return w
-        end
+-- Helper: find app windows without hs.window.filter
+-- (app:mainWindow() can miss some windows, while allWindows() includes
+--  minimized and cross-space windows without a global ordered scan)
+local function findAppWindow(app)
+    local wins = app:allWindows()
+    if wins and #wins > 0 then
+        return wins[1]
     end
     return nil
 end
@@ -29,7 +27,7 @@ local function bindAppToggle(mods, key, appName, bundleID)
         end
 
         -- Find app window
-        local win = findAppWindow(bundleID)
+        local win = findAppWindow(app)
 
         -- Case 3: no window found -> just activate
         if win == nil then
@@ -44,7 +42,9 @@ local function bindAppToggle(mods, key, appName, bundleID)
 
         -- Case 5: move to current space
         local currentSpace = hs.spaces.focusedSpace()
-        hs.spaces.moveWindowToSpace(win, currentSpace)
+        if currentSpace then
+            hs.spaces.moveWindowToSpace(win, currentSpace)
+        end
 
         -- Finalize
         app:activate()
