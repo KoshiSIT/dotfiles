@@ -1,55 +1,68 @@
--- =========================================
--- WezTerm Toggle (Ctrl + Cmd + J)
--- =========================================
-
--- Helper: find WezTerm window quickly
--- (app:mainWindow() returns nil for WezTerm due to window_decorations = "RESIZE",
+-- Helper: find app window quickly
+-- (app:mainWindow() can return nil depending on the app,
 --  and hs.window.filter is too slow for one-shot lookups)
-local function findWezTermWindow()
+local function findAppWindow(bundleID)
     for _, w in ipairs(hs.window.orderedWindows()) do
         local wApp = w:application()
-        if wApp and wApp:bundleID() == "com.github.wez.wezterm" then
+        if wApp and wApp:bundleID() == bundleID then
             return w
         end
     end
     return nil
 end
 
-hs.hotkey.bind({ "ctrl", "cmd" }, "J", function()
-    local app = hs.application.find("WezTerm")
+local function bindAppToggle(mods, key, appName, bundleID)
+    hs.hotkey.bind(mods, key, function()
+        local app = hs.application.find(appName)
 
-    -- Case 1: not running -> launch
-    if app == nil then
-        hs.application.launchOrFocus("WezTerm")
-        return
-    end
+        -- Case 1: not running -> launch
+        if app == nil then
+            hs.application.launchOrFocus(appName)
+            return
+        end
 
-    -- Case 2: WezTerm is frontmost -> hide
-    local frontApp = hs.application.frontmostApplication()
-    if frontApp and frontApp:bundleID() == app:bundleID() then
-        app:hide()
-        return
-    end
+        -- Case 2: app is frontmost -> hide
+        local frontApp = hs.application.frontmostApplication()
+        if frontApp and frontApp:bundleID() == app:bundleID() then
+            app:hide()
+            return
+        end
 
-    -- Find WezTerm window
-    local win = findWezTermWindow()
+        -- Find app window
+        local win = findAppWindow(bundleID)
 
-    -- Case 3: no window found -> just activate
-    if win == nil then
+        -- Case 3: no window found -> just activate
+        if win == nil then
+            app:activate()
+            return
+        end
+
+        -- Case 4: minimized -> unminimize
+        if win:isMinimized() then
+            win:unminimize()
+        end
+
+        -- Case 5: move to current space
+        local currentSpace = hs.spaces.focusedSpace()
+        hs.spaces.moveWindowToSpace(win, currentSpace)
+
+        -- Finalize
         app:activate()
-        return
-    end
+        win:focus()
+    end)
+end
 
-    -- Case 4: minimized -> unminimize
-    if win:isMinimized() then
-        win:unminimize()
-    end
+-- =========================================
+-- WezTerm Toggle (Ctrl + Cmd + J)
+-- =========================================
+bindAppToggle({ "ctrl", "cmd" }, "J", "WezTerm", "com.github.wez.wezterm")
 
-    -- Case 5: move to current space
-    local currentSpace = hs.spaces.focusedSpace()
-    hs.spaces.moveWindowToSpace(win, currentSpace)
+-- =========================================
+-- Codex Toggle (Ctrl + Cmd + C)
+-- =========================================
+bindAppToggle({ "ctrl", "cmd" }, "C", "Codex", "com.openai.codex")
 
-    -- Finalize
-    app:activate()
-    win:focus()
-end)
+-- =========================================
+-- Claude Toggle (Ctrl + Cmd + L)
+-- =========================================
+bindAppToggle({ "ctrl", "cmd" }, "L", "Claude", "com.anthropic.claudefordesktop")
