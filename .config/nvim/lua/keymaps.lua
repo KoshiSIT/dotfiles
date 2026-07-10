@@ -18,29 +18,75 @@ local function is_tree_buffer(bufnr)
     return filetype == 'NvimTree' or filetype == 'neo-tree'
 end
 
-local function cycle_buffer(command)
-    local fallback_buf = vim.api.nvim_get_current_buf()
-    local max_tries = math.max(vim.fn.bufnr('$'), 1)
+local function is_missing_file_buffer(bufnr)
+    if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+        return true
+    end
 
-    for _ = 1, max_tries do
-        vim.cmd(command)
-        local current_buf = vim.api.nvim_get_current_buf()
-        if not is_tree_buffer(current_buf) then
-            return
+    if vim.bo[bufnr].buftype ~= "" or vim.api.nvim_buf_is_loaded(bufnr) then
+        return false
+    end
+
+    local name = vim.api.nvim_buf_get_name(bufnr)
+    if name == "" then
+        return false
+    end
+
+    local path = vim.fn.fnamemodify(name, ":p")
+    return vim.fn.filereadable(path) == 0 and vim.fn.isdirectory(path) == 0
+end
+
+local function is_cycle_candidate(bufnr)
+    return vim.api.nvim_buf_is_valid(bufnr)
+        and vim.fn.buflisted(bufnr) == 1
+        and not is_tree_buffer(bufnr)
+        and not is_missing_file_buffer(bufnr)
+end
+
+local function collect_cycle_buffers()
+    local buffers = {}
+
+    for _, info in ipairs(vim.fn.getbufinfo({ buflisted = 1 })) do
+        if is_cycle_candidate(info.bufnr) then
+            table.insert(buffers, info.bufnr)
         end
     end
 
-    if vim.api.nvim_buf_is_valid(fallback_buf) then
-        vim.api.nvim_set_current_buf(fallback_buf)
-    end
+    return buffers
 end
 
-vim.keymap.set('n', '<C-o>', function()
-    cycle_buffer('bprevious')
+local function cycle_buffer(step)
+    local current_buf = vim.api.nvim_get_current_buf()
+    local buffers = collect_cycle_buffers()
+
+    if #buffers == 0 then
+        return
+    end
+
+    local current_index = nil
+    for index, bufnr in ipairs(buffers) do
+        if bufnr == current_buf then
+            current_index = index
+            break
+        end
+    end
+
+    if not current_index then
+        local target_index = step > 0 and 1 or #buffers
+        vim.api.nvim_set_current_buf(buffers[target_index])
+        return
+    end
+
+    local target_index = ((current_index - 1 + step) % #buffers) + 1
+    vim.api.nvim_set_current_buf(buffers[target_index])
+end
+
+vim.keymap.set('n', '[b', function()
+    cycle_buffer(-1)
 end, { noremap = true, silent = true, desc = 'Previous buffer (skip tree)' })
 
-vim.keymap.set('n', '<C-i>', function()
-    cycle_buffer('bnext')
+vim.keymap.set('n', ']b', function()
+    cycle_buffer(1)
 end, { noremap = true, silent = true, desc = 'Next buffer (skip tree)' })
 
 vim.api.nvim_create_user_command('BufferPath', function(opts)
